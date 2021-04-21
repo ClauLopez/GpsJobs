@@ -37,16 +37,18 @@ namespace ServiceSTCJobs
                 {
                     logger.Trace("Procesando {0} de {1} unidades", flg, CuentaVeh);
                     List<JobsInVT> result = SearchUnitInVT(Veh.VtServer, Veh.AppId, Veh.UserId);
-
-                    List<JobsInVT> RouteNoExist = FilterRouteExist(result);
-
-                    if (RouteNoExist != null && RouteNoExist.Count() > 0)
+                    if (result != null && result.Count > 0)
                     {
-                        SaveResultToDB(RouteNoExist, Veh.IdVehicleSTC);
+                        List<JobsInVT> RouteNoExist = FilterRouteExist(result);
+
+                        if (RouteNoExist != null && RouteNoExist.Count() > 0)
+                        {
+                            SaveResultToDB(RouteNoExist, Veh.IdVehicleSTC);
+                        }
                     }
                     flg++;
                 }
-                logger.Trace("Terminando..., todas las unidades fueron procesadas.", flg, CuentaVeh);
+                logger.Trace("Terminando..., todas las unidades fueron procesadas.", flg - 1, CuentaVeh);
             }
             catch (Exception ex)
             {
@@ -129,7 +131,7 @@ namespace ServiceSTCJobs
                         "(`RouteName`,`ScheduledTime`,`RouteId`,`JobId`,`UserIdVT`,`IdVehicleSTC`,",
                         "`CreatedBy`,`Created`,`ModifiedBy`,`Modified`)",
                         string.Format(" VALUES('{0}','{1}','{2}','{3}',{4},{5},'JobsApp',UTC_TIMESTAMP(),'JobsApp',UTC_TIMESTAMP()); ",
-                        Job.description, Job.scheduledTime, Job.routeId, Job.id, Job.workerId, IdVehicleSTC)));
+                        Job.description.Replace("'", @"\'"), Job.scheduledTime, Job.routeId, Job.id, Job.workerId, IdVehicleSTC)));
                 }
 
                 StcDataBase DB = new StcDataBase();
@@ -198,7 +200,12 @@ namespace ServiceSTCJobs
             }
             catch (Exception ex)
             {
-                logger.Error("Error al hacer llamado al Manager en seccion que va a REST de VT {0}", ex.Message);
+                if (ex.Message.ToLower().Contains("timed out") || ex.Message.ToLower().Contains("tiempo de espera"))
+                {
+                    logger.Info("Al consultar los jobs existentes en VT por Api Manager, regreso con un {0}, el llamado fue-->> {1} <<--, se reintentara posteriormente", ex.Message, URLTrackingVT);
+                }
+                else
+                    logger.Error("Error al hacer llamado al Manager en seccion que va a REST de VT {0}", ex.Message);
             }
 
             return result;

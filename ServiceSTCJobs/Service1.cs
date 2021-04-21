@@ -34,7 +34,7 @@ namespace ServiceSTCJobs
                 //4) escribe toda esta linea:
                 //CD C:\Windows\Microsoft.NET\Framework\v4.0.30319\InstallUtil.exe ServiceSTCGpscommunication.exe
                 //Para el setup borra resultadoprincipal seleccionando este proyecto 
-                logger.Info("Inicia procesos del servicio ServiceSTCJobs [V-1.0.0]");
+                logger.Info("Inicia procesos del servicio ServiceSTCJobs [V-1.0.3]");
 
                 STCSearchJobs obj = new STCSearchJobs();
                 obj.STCprocessJobsInUser();
@@ -67,7 +67,7 @@ namespace ServiceSTCJobs
         {
             try
             {
-                logger.Info("Terminando procesos del servicio ServiceSTCJobs [V-1.0.0]");
+                logger.Info("Terminando procesos del servicio ServiceSTCJobs [V-1.0.3]");
                 StopRequest.Set();
                 Worker.Join();
             }
